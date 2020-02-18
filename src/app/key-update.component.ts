@@ -53,7 +53,7 @@ export class KeyUpdateComponent
 			this.valueFormControl.setErrors({required: true});
 			isValid = false;
 		}
-		else if (value === this.key.value) 
+		else if((!this.key.changedValue && value === this.key.value) || value === this.key.changedValue)
 		{
 			this.valueFormControl.setErrors({sameValue: true});
 			isValid = false;
