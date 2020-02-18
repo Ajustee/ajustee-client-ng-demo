@@ -1,0 +1,165 @@
+<div style="display: flex; height: 100vh">
+	<ngx-loading [show]="isProcessing" [config]="{ backdropBorderRadius: '3px' }"></ngx-loading>
+
+	<mat-card style="width: 25%; border-right: 2px solid rgba(0, 0, 0, 0.06); min-width: min-content; margin: 5px; overflow: auto">
+		<mat-form-field appearance="outline" style="display: block" class="cc-mat-form-field">
+			<mat-label i18n="@@appId">App id</mat-label>
+			<input matInput
+			[formControl]="appIdFormControl" [errorStateMatcher]="esm"
+			autocomplete="off"
+			/>
+			<mat-error i18n="@@appIdErrorRequired" *ngIf="appIdFormControl.hasError('required');">App id is required</mat-error>
+			<mat-error i18n="@@appIdErrorInvalid" *ngIf="appIdFormControl.hasError('pattern');">Invalid app id</mat-error>
+			<mat-error i18n="@@appIdErrorShort" *ngIf="appIdFormControl.hasError('minlength');">App id is too short</mat-error>
+			<mat-error i18n="@@appIdErrorLong" *ngIf="appIdFormControl.hasError('maxlength');">App id is too long</mat-error>
+			<mat-error *ngIf="appIdFormControl.getError('validator'); let error;">{{error}}</mat-error>
+		</mat-form-field>
+
+		<mat-form-field appearance="outline" style="display: block" class="cc-mat-form-field">
+			<mat-label i18n="@@path">Path</mat-label>
+			<input matInput
+			[formControl]="pathFormControl" [errorStateMatcher]="esm"
+			maxlength="200"
+			autocomplete="off"
+			/>
+			<mat-error i18n="@@pathError" *ngIf="pathFormControl.hasError('pattern');">Invalid path</mat-error>
+			<mat-error *ngIf="pathFormControl.getError('validator'); let error;">{{error}}</mat-error>
+		</mat-form-field>
+
+		<div style="display: flex; justify-content: space-around; margin-top: 1em; margin-bottom: 2em">
+			<button i18n="@@getTheKeysButton" mat-stroked-button color="primary" (click)="getConfigKeys();" >Get the keys</button>
+			<button i18n="@@addAPropertyButton" mat-stroked-button (click)="addOverride();">Add a property</button>
+		</div>
+
+
+		<div style="display: flex; flex-direction: column;">
+
+			<ng-template ngFor let-item [ngForOf]="ovrFormControls" let-i="index">
+			<div style="display: flex; justify-content: space-around">
+				<mat-form-field>
+					<mat-label i18n="@@property">Property</mat-label>
+					<input matInput
+						[formControl]="ovrFormControls[i].paramName" [errorStateMatcher]="esm"
+						maxlength="200"
+						autocomplete="off"
+					/>
+					<mat-error i18n="@@propertyErrorRequired" *ngIf="ovrFormControls[i].paramName.hasError('required')">Property is required</mat-error>
+					<mat-error i18n="@@propertyErrorInvalid" *ngIf="ovrFormControls[i].paramName.hasError('pattern')">Invalid property</mat-error>
+					<mat-error *ngIf="ovrFormControls[i].paramName.getError('validator'); let error;">{{error}}</mat-error>
+				</mat-form-field>
+
+				<span style="display: flex">
+				<mat-form-field>
+					<mat-label i18n="@@value">Value</mat-label>
+					<input matInput
+					[formControl]="ovrFormControls[i].value" [errorStateMatcher]="esm"
+					maxlength="200"
+					autocomplete="off"
+					/>
+					<mat-error i18n="@@valueErrorRequired" *ngIf="ovrFormControls[i].value.hasError('required')">Value is required</mat-error>
+					<mat-error i18n="@@valueErrorInvalid" *ngIf="ovrFormControls[i].value.hasError('pattern')">Invalid value</mat-error>
+				</mat-form-field>
+
+				<button mat-icon-button style="align-self: center" (click)="removeOverride(i);">
+					<mat-icon [svgIcon]="'delete'" style="color: red"></mat-icon>
+				</button>
+			</span>
+			</div>
+			</ng-template>
+		</div>
+	</mat-card>
+
+	<cc-splitter direction="vertical" style="height: 100%; width: 100%"  (gutterClick)="gutterClick($event.sizes)" (dragEnd)="dragEnd($event.sizes)" [disabled]="isSplitterDisabled" [defaultGutter]="gutter" [gutterSize]="36">
+		<cc-splitter-area [size]="tableSize">
+
+			<div *ngIf="initialState" style="font-style: oblique; font-size: 18px; padding: 4px;">Enter an application id and press the "Get the keys" button.</div>
+
+			<div *ngIf="!initialState">
+
+				<div style="display: flex; justify-content: space-between; padding: 10px;">
+					<ng-container  [ngSwitch]="status" style="display: flex; align-items: center; font-size: 17px;">
+						<div *ngSwitchCase="'Disconnected'" style="color: red; display: flex; align-items: center; font-size: 17px;">
+							<div> OFFLINE</div>
+							<div class="dot" style="margin-left: 2ch; background-color: red;"></div>
+						</div>
+						<div *ngSwitchCase="'Connecting'" style="color: orange; display: flex; align-items: center; font-size: 17px;">
+							<div>CONNECTING</div>
+							<div class="dot" style="margin-left: 2ch; background-color: orange;"></div>
+						</div>
+						<div *ngSwitchCase="'Connected'" style="color: green; display: flex; align-items: center; font-size: 17px;">
+							<div>ONLINE</div>
+							<div class="dot" style="margin-left: 2ch; background-color: green;"></div>
+						</div>						
+					</ng-container>
+					<div style="display: flex; justify-content: space-around;">
+						<button mat-raised-button color="primary" (click)="showSubscriptions();">
+							Subscriptions
+						</button>
+						<button mat-raised-button color="primary" (click)="showKeyLog();" [matBadge]="changedKeysCount" matBadgeColor="warn" matBadgeSize="small" [matBadgeHidden]="changedKeysCount === 0" style="margin-left: 5ch;">
+							Key changes
+						</button>
+					</div>
+				</div>
+
+				<mat-table *ngIf="configKeys.data.length > 0" [dataSource]="configKeys" style="border: 1px solid rgba(0, 0, 0, 0.06); border-collapse: collapse;  width: 100%; font-size:20px;" class="cc-table">
+					<ng-container matColumnDef="Key">
+						<mat-header-cell i18n="@@keyHeader" *matHeaderCellDef style="color: #673ab7; font-size: 14px;"> Key </mat-header-cell>
+						<mat-cell *matCellDef="let element;"> {{element.path}} </mat-cell>
+					</ng-container>
+
+
+					<ng-container matColumnDef="DataType">
+						<mat-header-cell i18n="@@dataTypeHeader" *matHeaderCellDef style="color: #673ab7; font-size: 14px; flex: 0 0 20ch;"> DataType </mat-header-cell>
+						<mat-cell *matCellDef="let element;" style="flex: 0 0 20ch;"> {{element.dataType}} </mat-cell>
+					</ng-container>
+
+
+					<ng-container matColumnDef="Value">
+						<mat-header-cell i18n="@@valueHeader" *matHeaderCellDef style="color: #673ab7; font-size: 14px;" > Value </mat-header-cell>
+						<mat-cell *matCellDef="let element;" style="word-break: break-all;"> 
+							<span [style.text-decoration]="element.changedValue != undefined ? 'line-through': 'unset'">{{element.viewValue ? element.viewValue : element.value}}</span> 
+							<mat-icon [svgIcon]="'arrow'" *ngIf="element.changedValue != undefined" style="min-width: 24px;"></mat-icon>
+							<span>{{element.changedValue != undefined ? element.changedValue : ''}}</span>
+						</mat-cell>
+					</ng-container>
+
+
+					<ng-container matColumnDef="TrackKey">
+						<mat-header-cell *matHeaderCellDef style="color: #673ab7; font-size: 14px; justify-content: space-between; flex: 0 0 15ch;">
+							Track Key
+						</mat-header-cell>
+						<mat-cell *matCellDef="let element;" style="flex: 0 0 15ch;"><mat-slide-toggle (change)="subscribe($event, element);" [checked]="element.isSubscribed" [disabled]="element.isToggleDisabled"></mat-slide-toggle></mat-cell>
+					</ng-container>
+
+					<mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+					<mat-row cc-key-row [configKey]="row" *matRowDef="let row; columns: displayedColumns;" (dblclick)="updateConfigKey(row);"></mat-row>
+				</mat-table>
+			</div>
+
+		</cc-splitter-area>
+		<cc-splitter-area [size]="rawSize" style="border-top: 2px solid rgba(0, 0, 0, 0.06); border-left: 2px solid rgba(0, 0, 0, 0.06);">
+			<div style="overflow: auto; margin-bottom: 5px" *ngIf="!isSplitterDisabled">
+			[
+			<div *ngFor="let key of configKeys.data; last as isLast;">
+				<div>
+					&nbsp; &#123;
+					<div> &nbsp; &nbsp; "path": "{{key.path}}",</div>
+					<div> &nbsp; &nbsp; "dataType": "{{key.dataType}}", </div>
+					<div> &nbsp; &nbsp; "value": "{{key.value}}"</div>
+					&nbsp; &#125; <span *ngIf="!isLast">,</span>
+				</div>
+			</div>
+			]
+			</div>
+		</cc-splitter-area>
+	</cc-splitter>
+
+</div>
+
+<ng-template #gutter>
+  <button mat-stroked-button i18n="@@rawViewButton" [disabled]="isSplitterDisabled"  style="width: 100%; height: 100%;"><span [style.color]="isSplitterDisabled ? 'rgba(0, 0, 0, 0.54)' : '#673ab7'">Raw view</span></button>
+</ng-template>
+
+<mat-menu #menu="matMenu">
+	Keys have been changed
+</mat-menu>

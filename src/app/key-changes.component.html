@@ -1,0 +1,49 @@
+<div style="overflow: hidden; overflow-x: hidden; display: flex; flex-direction: column; height: 100%;">
+	<mat-table *ngIf="configKeys.data.length > 0" [dataSource]="configKeys" style="border: 1px solid rgba(0, 0, 0, 0.06); border-collapse: collapse;  width: 100%; font-size:20px; border: unset; overflow: auto;" class="cc-table">
+		
+		<ng-container matColumnDef="EventTime">
+			<mat-header-cell i18n="@@keyHeader" *matHeaderCellDef style="color: #673ab7; font-size: 14px; flex: 0 0 20ch"> Event time </mat-header-cell>
+			<mat-cell *matCellDef="let element;" style="flex: 0 0 20ch"> {{element.eventTime}} </mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="Key">
+			<mat-header-cell i18n="@@keyHeader" *matHeaderCellDef style="color: #673ab7; font-size: 14px;"> Key </mat-header-cell>
+			<mat-cell *matCellDef="let element;"> {{element.path}} </mat-cell>
+		</ng-container>
+		
+		
+		<ng-container matColumnDef="OldValue">
+			<mat-header-cell i18n="@@valueHeader" *matHeaderCellDef style="color: #673ab7; font-size: 14px; margin-right: 1ch;" > Old Value </mat-header-cell>
+			<mat-cell *matCellDef="let element;" style="margin-right: 1ch;"> {{element.oldValue}} </mat-cell>
+		</ng-container>
+		
+
+		<ng-container matColumnDef="NewValue">
+			<mat-header-cell *matHeaderCellDef style="color: #673ab7; font-size: 14px; justify-content: space-between; margin-right: 1ch;">
+				New Value 
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element;" style="margin-right: 1ch;">{{element.newValue}}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="DataType">
+			<mat-header-cell i18n="@@dataTypeHeader" *matHeaderCellDef style="color: #673ab7; font-size: 14px; flex: 0 0 15ch"> DataType </mat-header-cell>
+			<mat-cell *matCellDef="let element;" style="flex: 0 0 15ch"> {{element.dataType}} </mat-cell>
+		</ng-container>
+		
+		<mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+	</mat-table>
+
+	<div *ngIf="!configKeys.data || configKeys.data.length === 0">
+		There are no updates.
+	</div>
+
+	<div style="flex: 1 1 auto;"></div>
+
+	<div style="flex: 0 0 auto; display: flex; align-items: baseline; justify-content: center; margin-bottom: unset;">
+		<button mat-stroked-button (click)="dialogRef.close()" class="popup-cancel-button"  style="display: flex; align-items: baseline; justify-content: center;">
+			<span>Cancel</span>
+			<mat-icon svgIcon="cancel" class="cancel-icon"></mat-icon>
+		</button>
+	</div>
+</div>

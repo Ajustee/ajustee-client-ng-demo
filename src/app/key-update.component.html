@@ -1,0 +1,70 @@
+<ngx-loading [show]="isProcessing" [config]="{ backdropBorderRadius: '3px' }"></ngx-loading>
+
+<div class="popup-title">Update enviroment value for the config key {{key.path}}</div>
+
+<div [ngSwitch]="key.dataType">
+	<ng-template ngSwitchCase="Integer">
+		<mat-form-field appearance="outline" style="display: block">
+			<mat-label>Key value</mat-label>
+			<input type="number" autocomplete="off" matInput [formControl]="valueFormControl" [errorStateMatcher]="esm"/>
+			<mat-error *ngIf="valueFormControl.hasError('required')">The value is required.</mat-error>
+			<mat-error *ngIf="valueFormControl.getError('sameValue');">Change the value before submitting it</mat-error>
+			<mat-error *ngIf="valueFormControl.getError('validator'); let error;">{{error}}</mat-error>
+		</mat-form-field>
+	</ng-template>
+
+
+	<ng-template ngSwitchCase="String">
+		<mat-form-field appearance="outline" style="display: block">
+			<mat-label>Key value</mat-label>
+			<textarea matInput autocomplete="off" [formControl]="valueFormControl"></textarea>
+			<mat-error *ngIf="valueFormControl.hasError('required');">The value i is required</mat-error>
+			<mat-error *ngIf="valueFormControl.getError('sameValue');">Change the value before submitting it</mat-error>
+			<mat-error *ngIf="valueFormControl.getError('validator'); let error;">{{error}}</mat-error>
+		</mat-form-field>
+	</ng-template>
+
+
+	<ng-template ngSwitchCase="Boolean">
+		<div style="display: flex; justify-content: space-between; margin-left: 0.5ch;">
+			<label>Key value</label>
+			<mat-slide-toggle [formControl]="valueFormControl">
+				<span style="display: inline-block; min-width: 5ch;">{{valueFormControl.value ? 'true' : 'false'}}</span>
+			</mat-slide-toggle>
+			<mat-error *ngIf="valueFormControl.getError('sameValue');">Change the value before submitting it</mat-error>
+		</div>
+	</ng-template>
+
+	<ng-template ngSwitchCase="Date">
+		<mat-form-field appearance="outline" style="display: block">
+			<mat-label>Key value</mat-label>
+			<input matInput autocomplete="off" [matDatepicker]="picker" [formControl]="valueFormControl" [errorStateMatcher]="esm">
+			<mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+			<mat-datepicker #picker></mat-datepicker>
+			<mat-error *ngIf="valueFormControl.hasError('required')">The value is required.</mat-error>
+			<mat-error *ngIf="valueFormControl.hasError('matDatepickerParse')">Invalid date format.</mat-error>
+			<mat-error *ngIf="valueFormControl.getError('validator'); let error;">{{error}}</mat-error>
+			<mat-error *ngIf="valueFormControl.getError('sameValue');">Change the value before submitting it</mat-error>
+		</mat-form-field>
+	</ng-template>
+
+	<ng-template ngSwitchCase="DateTime">
+		<datetime-picker [form-control]="valueFormControl">Key value</datetime-picker>
+		<mat-error *ngIf="valueFormControl.getError('validator'); let error;">{{error}}</mat-error>
+		<mat-error *ngIf="valueFormControl.getError('sameValue');">Change the value before submitting it</mat-error>
+	</ng-template>
+
+</div>
+
+<mat-dialog-actions style="justify-content: center;">
+	<button mat-stroked-button class="popup-update-button" (click)="submit()">
+		<span>Update</span>
+		<mat-icon svgIcon="add" class="edit-icon"></mat-icon>
+	</button>
+
+	<button mat-stroked-button (click)="dialogRef.close()" class="popup-cancel-button"  style="margin-left: 2ch; display: flex; align-items: baseline; justify-content: center;">
+		<span>Cancel</span>
+		<mat-icon svgIcon="cancel" class="cancel-icon"></mat-icon>
+	</button>
+</mat-dialog-actions>
+

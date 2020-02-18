@@ -1,0 +1,89 @@
+// Background animation
+
+.key-value-changed-2
+{
+	background-color: white;
+	animation-name: key-value-changed-2-animation;
+	animation-duration: 1s;
+	animation-iteration-count: 3;
+}
+  
+@keyframes key-value-changed-2-animation 
+{
+	0%   {background-color: white;}
+	50%  {background-color: powderblue;}
+	100% {background-color: white;}
+}
+
+// table styles
+
+.cc-table
+{
+	mat-row
+	{
+		border-bottom-width: unset;
+		border-bottom-style: unset;
+	}
+
+	mat-header-row
+	{
+		border-bottom-width: unset;
+		border-bottom-style: unset;
+	}
+
+	mat-header-row:hover  {
+		background-color: white;
+	}
+
+	.mat-row:hover  {
+		background-color:  #F4F5F7;;
+	}
+
+	.mat-row-selected
+	{
+		background-color: #E6ECF5;
+	}
+
+	mat-header-cell
+	{
+		text-transform: uppercase;
+	}
+
+	.mat-sort-header-button 
+	{
+		text-transform: uppercase;
+	}
+
+	.cc-mat-cell
+	{
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		display: unset;
+		min-height: unset;
+	}
+}
+
+.dot 
+{
+	height: 22px;
+	width: 22px;
+	background-color: #bbb;
+	border-radius: 50%;
+	display: inline-block;
+}
+
+.cancel-icon
+{
+	transform: scale(0.56);
+}
+
+.mat-stroked-button
+{
+	&.popup-cancel-button
+	{
+		color: #673ab7;
+		border-radius: 4px;
+		width: 20ch;
+	}
+}

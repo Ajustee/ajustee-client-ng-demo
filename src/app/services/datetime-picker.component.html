@@ -1,0 +1,20 @@
+<mat-form-field appearance="outline" style="display: block">
+	<mat-label><ng-content></ng-content></mat-label>
+	<mat-checkbox #checkbox="matCheckbox"
+		matPrefix
+		color="primary"
+		style="margin-right: 1ch"
+		(change)="handleIsSetChange($event)"
+		[hidden]="!isOptional"
+	></mat-checkbox>
+	<input
+		[matDatepicker]="picker"
+		matInput
+		[errorStateMatcher]="esm"
+		[formControl]="formControl"
+	>
+	<mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+	<cc-datepicker #picker></cc-datepicker>
+	<mat-error *ngIf="formControl.hasError('required')">The date value is required.</mat-error>
+	<mat-error *ngIf="formControl.hasError('matDatepickerParse')">Invalid date format.</mat-error>
+</mat-form-field>

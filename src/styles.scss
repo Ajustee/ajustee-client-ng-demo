@@ -1,0 +1,24 @@
+@import '~@angular/material/prebuilt-themes/deeppurple-amber.css';
+@import '~@angular/cdk/overlay-prebuilt.css';
+
+  
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    margin: 0px;
+}
+
+.cc-mat-form-field.ng-invalid
+{
+    .mat-form-field-wrapper
+    {
+        padding-bottom: 2.7em;
+    }
+    .mat-form-field-subscript-wrapper
+    {
+        top: unset;
+    }
+}
