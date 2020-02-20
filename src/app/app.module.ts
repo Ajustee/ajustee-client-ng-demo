@@ -83,7 +83,7 @@ import { AjusteeClientSvc } from './AjusteeClientSvc';
 		MatMenuModule,
 		MatDialogModule,
 		AngularSplitModule.forRoot(),
-		ToastrModule.forRoot(),
+		ToastrModule.forRoot({ positionClass: "cc-toast-top-right" }),
 		NgxLoadingModule,
 		MatDatepickerModule,
 		MatCheckboxModule,

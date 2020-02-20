@@ -1,4 +1,4 @@
-import { Component, Directive, QueryList, ViewChildren, ElementRef, Input, ChangeDetectorRef } from '@angular/core';
+import { Component, Directive, QueryList, ViewChildren, ElementRef, Input, ChangeDetectorRef, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -39,7 +39,7 @@ export class TrackKeyChangeDirective
 	styleUrls: ['./app.component.scss'],
 })
 
-export class AppComponent
+export class AppComponent implements OnInit
 {
 	isProcessing = false;
 	errDurationSeconds = 3;
@@ -57,7 +57,7 @@ export class AppComponent
 	configKeys: MatTableDataSource<ConfigurationKeyVm>;
 	displayedColumns: string[] = ['Key', 'Value', 'DataType', 'TrackKey'];
 	subscribedKeys: MatTableDataSource<SubscrConfigurationKey>;
-	subscribedKeysSet: Set<SubscrConfigurationKey> = new Set()
+	subscribedKeysMap: Map<string, SubscrConfigurationKey> = new Map();
 	ccKeyLogEvents: MatTableDataSource<CcKeyLog>;
 	changedKeysCount = 0;
 	isCcKeyLogOpened: boolean = false;
@@ -65,8 +65,7 @@ export class AppComponent
 	client: AjusteeClient<SubscrConfigurationKey>;
 
 	readonly esm = esm;
-	appIdFormControl = new FormControl('qyg2SwWdGk54YgHvmYAS39bzA9oYhm4.', [Validators.pattern(appIdRegExp), Validators.maxLength(32)]);
-	// qyg2SwWdGk54YgHvmYAS39bzA9oYhm4. -- test appId
+	appIdFormControl = new FormControl('', [Validators.pattern(appIdRegExp), Validators.maxLength(32)]);
 	pathFormControl = new FormControl('', Validators.pattern(pathRegExp));
 	ovrFormControls: OverrideFormControls[] = [
 		{paramName: new FormControl(''), value: new FormControl('')}, 
@@ -76,12 +75,10 @@ export class AppComponent
 	currOverrides: OvrComparer = new OvrComparer();
 	curPath: string = '';
 
-	subscrCounter: number = 0;
 	unsubscrCompletedPromise: Promise<void>;
 	unsubscrCompletedResolve: ()=>void;
 
 	constructor(
-		private _snackBar: MatSnackBar, 
 		private readonly dialog: MatDialog,
 		private readonly toastr: ToastrService, 
 		private changeDetector: ChangeDetectorRef,
@@ -91,30 +88,29 @@ export class AppComponent
 		this.client = clientSvc.client;
 		const listeners: AjusteeAllKeysListener<AjusteeKeyListenerBase> = 
 		{
-			onChange: this.onChange.bind(this),
-			onError: this.onError.bind(this),
-			onSubscriptionChange: this.onSubscriptionChange.bind(this),
+			onChange: this.handleKeyChange.bind(this),
+			onError: this.handleKeyError.bind(this),
+			onSubscriptionChange: this.handleSubscrChange.bind(this),
 		}
 		this.client.allKeysListeners = listeners;
-		this.client.statusListener = this.onStatusChange.bind(this);
+		this.client.statusListener = this.handleStatusChange.bind(this);
+		this.client.onError = this.handleError.bind(this);
 		this.configKeys = new MatTableDataSource<ConfigurationKeyVm>();
 		this.ccKeyLogEvents = new MatTableDataSource<CcKeyLog>();
 		this.subscribedKeys = new MatTableDataSource<SubscrConfigurationKey>();
 	}
 
+	async ngOnInit(): Promise<void> {
+		try
+		{
+			const res = await fetch('config-private.json');
+			const config = await res.json();
+			this.appIdFormControl.setValue(config.appId);
+		}
+		catch(e){}
 
-	// app.component.html
-
-	showErrorSnackBar(error: Error, action: string) 
-	{
-		this._snackBar.open(
-			error.message,
-			action,	
-			{politeness: 'assertive',
-			announcementMessage: error.message,
-			duration: this.errDurationSeconds * 1000,
-		});
 	}
+	// app.component.html
 
 	headerClick()
 	{
@@ -256,7 +252,7 @@ export class AppComponent
 				this.changedKeysCount = 0;
 				this.ccKeyLogEvents.data = [];
 				this.subscribedKeys.data = [];
-				this.subscribedKeysSet.clear();
+				this.subscribedKeysMap.clear();
 			}
 
 			const keys = await this.client.getConfigKeys(path);
@@ -266,10 +262,7 @@ export class AppComponent
 				key.viewValue = valueToEnDateTime(key);
 				key.isSubscribed = false;
 				key.isToggleDisabled = false;
-				for (let subscrKey of this.subscribedKeys.data)
-				{
-					if (key.path === subscrKey.path) key.isSubscribed = true;
-				}
+				if (this.subscribedKeysMap.has(key.path)) key.isSubscribed = true;
 			}	
 			
 			this.currAppId = appId;
@@ -283,34 +276,42 @@ export class AppComponent
 		catch(e)
 		{
 			console.log(e);
-			this.showErrorSnackBar(e, 'Unable to get config keys');
+			this.toastr.clear();
+			this.toastr.error(`Unable to get config keys. ${e.message}`, undefined, {positionClass: 'toast-top-right'});
+			this.initialState = true;
+			this.changedKeysCount = 0;
+			this.ccKeyLogEvents.data = [];
+			this.subscribedKeys.data = [];
+			this.configKeys.data = [];
+			this.subscribedKeysMap.clear();
 		}
 
 		this.isProcessing = false;
 	}
 
-	subscribe(toggle: any, key: ConfigurationKeyVm)
+	subscribe(toggle: any, keyVm: ConfigurationKeyVm)
 	{
-		key.isToggleDisabled = true;
+		keyVm.isToggleDisabled = true;
+		keyVm.isSubscribed = true;
 		if(toggle.checked)
 		{
 			const keyInfo: SubscrConfigurationKey = 
 			{
-				path: key.path, 
-				dataType: key.dataType,
-				value: key.value
+				path: keyVm.path, 
+				dataType: keyVm.dataType,
+				value: keyVm.value
 			}
 			this.client.setConfigKeyListener(keyInfo);
 		}
 		else
 		{
-			this.client.removeConfigKeyListener(key.path);
+			this.client.removeConfigKeyListener(keyVm.path);
 		}
 	}
 
 	// ws listeners
 
-	onSubscriptionChange(keyInfo: SubscrConfigurationKey)
+	handleSubscrChange(keyInfo: SubscrConfigurationKey)
 	{
 		if (keyInfo.status === AjusteeKeyStatus.Subscribing || keyInfo.status === AjusteeKeyStatus.Unsubscribing) return;
 		let keyList = this.configKeys.data;
@@ -328,19 +329,17 @@ export class AppComponent
 		const subscrKeyList = this.subscribedKeys.data;
 		if (keyInfo.status === AjusteeKeyStatus.Subscribed)
 		{
-			if(!this.subscribedKeysSet.has(keyInfo))
+			if(!this.subscribedKeysMap.has(keyInfo.path))
 			{
 				keyInfo.viewValue = valueToEnDateTime(keyInfo)
 				subscrKeyList.push(keyInfo);
-				this.subscribedKeysSet.add(keyInfo);
+				this.subscribedKeysMap.set(keyInfo.path, keyInfo);
 				this.toastr.success(`The config key ${keyInfo.path} has been successfully subscribed.`);
-				++this.subscrCounter;
-				console.log(this.subscrCounter);
 			}
 		}
 		else
 		{	
-			this.subscribedKeysSet.delete(keyInfo);
+			this.subscribedKeysMap.delete(keyInfo.path);
 			if (!this.unsubscrCompletedResolve)
 			{
 				for (let i = 0; i < subscrKeyList.length; i++)
@@ -354,13 +353,13 @@ export class AppComponent
 					}
 				}
 			}
-			if (this.subscribedKeysSet.size === 0 && this.unsubscrCompletedResolve) 
+			if (this.subscribedKeysMap.size === 0 && this.unsubscrCompletedResolve) 
 			{
 				this.unsubscrCompletedResolve();
 				this.unsubscrCompletedPromise = undefined;
 				this.unsubscrCompletedResolve = undefined;
 			}
-			console.log(this.subscrCounter);
+
 		}
 		this.subscribedKeys.data = subscrKeyList;
 
@@ -368,7 +367,7 @@ export class AppComponent
 	}
 
 
-	onChange(keyInfo: SubscrConfigurationKey)
+	handleKeyChange(keyInfo: SubscrConfigurationKey)
 	{	
 		let keyList = this.configKeys.data;
 		for (let key of keyList)
@@ -411,14 +410,13 @@ export class AppComponent
 		this.changeDetector.detectChanges();
 	}
 
-	onStatusChange(status: AjusteeClientStatus)
+	handleStatusChange(status: AjusteeClientStatus)
 	{
-		// if (status === AjusteeClientStatus.Disconnected) this.subscrCounter = 0;
 		this.status = status;
 		this.changeDetector.detectChanges();
 	}
 
-	onError(keyInfo: AjusteeKeyListenerBase, error: AjusteeKeyListenerCode)
+	handleKeyError(keyInfo: AjusteeKeyListenerBase, error: AjusteeKeyListenerCode)
 	{
 		switch(error)
 		{
@@ -449,7 +447,7 @@ export class AppComponent
 					}
 				}
 				this.subscribedKeys.data = subscrKeyList;
-				this.subscribedKeysSet.delete(keyInfo);
+				this.subscribedKeysMap.delete(keyInfo.path);
 
 				const keyLogList = this.ccKeyLogEvents.data;
 				const keyLog: CcKeyLog = 
@@ -478,6 +476,19 @@ export class AppComponent
 			default:
 				this.toastr.error('Server internal error.');
 		}
+		this.changeDetector.detectChanges();
+	}
+
+	handleError()
+	{
+		this.toastr.error('Unable to establish connection');
+		let keyList = this.configKeys.data;
+		for (const key of keyList)
+		{
+			key.isToggleDisabled = false;
+			key.isSubscribed = false;
+		}
+		this.configKeys.data = keyList;
 		this.changeDetector.detectChanges();
 	}
 

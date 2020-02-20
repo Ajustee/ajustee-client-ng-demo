@@ -1,1 +1,0 @@
-window.apiUrlFo = 'https://b3bke9zpxg.execute-api.us-west-2.amazonaws.com/fo';

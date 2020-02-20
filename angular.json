@@ -30,7 +30,9 @@
             "aot": true,
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+			  "src/assets",
+			  "src/config-private.json",
+			  "src/config.js"
             ],
             "styles": [
 			  "src/styles.scss",

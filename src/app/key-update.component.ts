@@ -105,7 +105,10 @@ export class KeyUpdateComponent
 					changedValue = formCtValue;
 			}
 			await this.client.updateConfigKey(this.key.path, newValue);
-			this.key.changedValue = changedValue;			
+
+			if(changedValue === this.key.viewValue) this.key.changedValue = undefined;
+			else this.key.changedValue = changedValue;
+				
 			this.dialogRef.close(this.key);
 		}
 		catch(e)
