@@ -4,7 +4,7 @@ import { Platform } from '@angular/cdk/platform';
 import { MatCheckbox, MatCheckboxChange } from '@angular/material/checkbox';
 import { MAT_DATE_FORMATS, NativeDateAdapter, DateAdapter } from '@angular/material/core';
 import { MatDatepicker } from '@angular/material/datepicker';
-import { esm, uiLocale, uiDateFormatter, DateTimeFormatter, uiDateFormat } from '../utils';
+import { esm, uiLocale, uiDateFormatter, DateTimeFormatter, uiDateFormat } from './utils';
 
 const monthYearLabel: Intl.DateTimeFormatOptions = {year: 'numeric', month: 'short'};
 const dateA11yLabel: Intl.DateTimeFormatOptions = {year: 'numeric', month: 'long', day: 'numeric'};
@@ -16,10 +16,8 @@ const dateA11yLabelFormatter = new Intl.DateTimeFormat(uiLocale, dateA11yLabel);
 const monthYearA11yLabelFormatter = new Intl.DateTimeFormat(uiLocale, monthYearA11yLabel);
 
 @Injectable()
-export class DateTimeAdapter extends NativeDateAdapter
+export class CcDateTimeAdapter extends NativeDateAdapter
 {
-
-
 	constructor(platform: Platform)
 	{
 		super(uiLocale, platform);
@@ -37,7 +35,7 @@ export class DateTimeAdapter extends NativeDateAdapter
 
 	toIso8601(date: Date): string
 	{
-		return date.toISOString();
+		throw new Error(`The method ${CcDateTimeAdapter.name}.${this.toIso8601.name} is not implemented.`);
 	}
 
 	getFormatter(displayFormat: Object): Intl.DateTimeFormat|DateTimeFormatter
@@ -54,13 +52,14 @@ export class DateTimeAdapter extends NativeDateAdapter
 
 	format(date: Date, displayFormat: DateTimeFormatter): string
 	{
-
-		if (!this.isValid(date)) throw Error('NativeDateAdapter: Cannot format invalid date.');
+		if (!this.isValid(date)) throw Error(`${CcDateTimeAdapter.name}: Cannot format invalid date.`);
 		return displayFormat.format(date);
 	}
 
 	parse(value: any): Date
 	{
+		value = value.trim();
+		if (value.endsWith('Z')) value = value.substr(0, value.length-1);
 		return new Date(value);
 	}
 
@@ -72,8 +71,8 @@ export class DateTimeAdapter extends NativeDateAdapter
 
 @Component(
 {
-	selector: 'datetime-picker',
-	templateUrl: './datetime-picker.component.html',
+	selector: 'cc-datetime-picker',
+	templateUrl: './CcDateTimePicker.html',
 	providers:
 	[
 		{
@@ -95,11 +94,11 @@ export class DateTimeAdapter extends NativeDateAdapter
 		},
 		{
 			provide: DateAdapter,
-			useClass: DateTimeAdapter
+			useClass: CcDateTimeAdapter
 		},
 	],
 })
-export class DateTimePickerComponent implements OnChanges
+export class CcDateTimePicker implements OnChanges
 {
 	@ViewChild('checkbox', { static: true }) checkbox: MatCheckbox;
 
@@ -156,7 +155,7 @@ export class DateTimePickerComponent implements OnChanges
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	encapsulation: ViewEncapsulation.None,
 })
-export class CcDateTimePicker extends  MatDatepicker<Date>
+export class CcDatePicker extends  MatDatepicker<Date>
 {
 	select(date: Date): void
 	{

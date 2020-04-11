@@ -49,7 +49,7 @@
 	</ng-template>
 
 	<ng-template ngSwitchCase="DateTime">
-		<datetime-picker [form-control]="valueFormControl">Key value</datetime-picker>
+		<cc-datetime-picker [form-control]="valueFormControl">Key value</cc-datetime-picker>
 		<mat-error *ngIf="valueFormControl.getError('validator'); let error;">{{error}}</mat-error>
 		<mat-error *ngIf="valueFormControl.getError('sameValue');">Change the value before submitting it</mat-error>
 	</ng-template>

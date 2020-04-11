@@ -36,7 +36,7 @@ import { KeySubscriptionsComponent } from './key-subscriptions.component';
 import {MatDialogModule} from '@angular/material/dialog';
 import { ToastrModule } from 'ngx-toastr';
 import { KeyUpdateComponent } from './key-update.component';
-import { CcDateTimePicker, DateTimePickerComponent } from './services/datetime-picker.component';
+import { CcDatePicker, CcDateTimePicker } from './CcDateTimePicker';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { AjusteeClientSvc } from './AjusteeClientSvc';
@@ -53,8 +53,8 @@ import { AjusteeClientSvc } from './AjusteeClientSvc';
 		CcSplitterComponent,
 		CcSplitterAreaDirective,
 		TrackKeyChangeDirective,
-		DateTimePickerComponent,
-		CcDateTimePicker
+		CcDateTimePicker,
+		CcDatePicker
 	],
 	providers: [AjusteeClientSvc],
 	imports: [
@@ -100,7 +100,7 @@ import { AjusteeClientSvc } from './AjusteeClientSvc';
 	entryComponents: [KeyChangesComponent, KeySubscriptionsComponent, KeyUpdateComponent],
 	bootstrap: [AppComponent]
 })
-export class AppModule { 
+export class AppModule {
   constructor(
 		iconRegistry: MatIconRegistry,
 		domSanitizer: DomSanitizer,
