@@ -1,14 +1,13 @@
 import { Component, Directive, QueryList, ViewChildren, ElementRef, Input, ChangeDetectorRef, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormControl, Validators } from '@angular/forms';
 import { KeyChangesComponent } from './key-changes.component';
 import { ToastrService } from 'ngx-toastr';
 import { KeySubscriptionsComponent } from './key-subscriptions.component';
 import { ConfigurationKeyVm, CcKeyLog, OverrideFormControls, SubscrConfigurationKey } from './models';
-import { AjusteeClient, ConfigurationKey, AjusteeAllKeysListener, AjusteeKeyListenerCode, AjusteeKeyListenerBase, AjusteeClientStatus, AjusteeKeyStatus } from './AjusteeClient';
-import { observableToPromise, getEnDateTime, esm, valueToEnDateTime, OvrComparer } from './utils';
+import { AjusteeClient, AjusteeAllKeysListener, AjusteeKeyListenerCode, AjusteeKeyListenerBase, AjusteeClientStatus, AjusteeKeyStatus } from './AjusteeClient';
+import { esm, valueToEnDateTime, OvrComparer, uiLocale, uiDateTimeFormat } from './utils';
 import { KeyUpdateComponent } from './key-update.component';
 import { AjusteeClientSvc } from './AjusteeClientSvc';
 
@@ -27,7 +26,7 @@ const openRaw = 30;
 const openTable = 100 - closedRaw;
 
 @Directive({selector: '[cc-key-row]'})
-export class TrackKeyChangeDirective 
+export class TrackKeyChangeDirective
 {
 	@Input() public configKey: ConfigurationKeyVm;
 	constructor(public element: ElementRef) {}
@@ -68,7 +67,7 @@ export class AppComponent implements OnInit
 	appIdFormControl = new FormControl('', [Validators.pattern(appIdRegExp), Validators.maxLength(32)]);
 	pathFormControl = new FormControl('', Validators.pattern(pathRegExp));
 	ovrFormControls: OverrideFormControls[] = [
-		{paramName: new FormControl(''), value: new FormControl('')}, 
+		{paramName: new FormControl(''), value: new FormControl('')},
 		{paramName: new FormControl(''), value: new FormControl('')}
 	];
 	currAppId: string = '';
@@ -80,13 +79,13 @@ export class AppComponent implements OnInit
 
 	constructor(
 		private readonly dialog: MatDialog,
-		private readonly toastr: ToastrService, 
+		private readonly toastr: ToastrService,
 		private changeDetector: ChangeDetectorRef,
 		clientSvc: AjusteeClientSvc
-	) 
+	)
 	{
 		this.client = clientSvc.client;
-		const listeners: AjusteeAllKeysListener<AjusteeKeyListenerBase> = 
+		const listeners: AjusteeAllKeysListener<AjusteeKeyListenerBase> =
 		{
 			onChange: this.handleKeyChange.bind(this),
 			onError: this.handleKeyError.bind(this),
@@ -123,12 +122,12 @@ export class AppComponent implements OnInit
 		if(this.isSplitterDisabled) return;
 		const size = sizes[1];
 
-		if (size === closedRaw) 
+		if (size === closedRaw)
 		{
 			this.rawSize = this.rawSizeExt;
 			this.tableSize = 100 - this.rawSizeExt;
 		}
-		else 
+		else
 		{
 			this.rawSize = closedRaw;
 			this.tableSize = openTable;
@@ -142,12 +141,12 @@ export class AppComponent implements OnInit
 		this.rawSizeExt = sizes[1];
 	}
 
-	addOverride() 
+	addOverride()
 	{
 		this.ovrFormControls.push({paramName: new FormControl(''), value: new FormControl('')});
 	}
 
-	removeOverride(index: number) 
+	removeOverride(index: number)
 	{
 		this.ovrFormControls.splice(index, 1);
 	}
@@ -162,7 +161,7 @@ export class AppComponent implements OnInit
 	{
 		let isValid = true;
 		const appId = this.appIdFormControl.value.trim();
-		if (!appId) 
+		if (!appId)
 		{
 			this.appIdFormControl.setErrors({required: true});
 			isValid = false;
@@ -207,7 +206,7 @@ export class AppComponent implements OnInit
 		return isValid;
 	}
 
-	async getConfigKeys() 
+	async getConfigKeys()
 	{
 		if (!this.validate()) return;
 		this.isProcessing = true;
@@ -219,26 +218,26 @@ export class AppComponent implements OnInit
 			for (let i=0; i<this.ovrFormControls.length; i++)
 			{
 				const paramName = this.ovrFormControls[i].paramName.value;
-				if (paramName ==='') continue; 
+				if (paramName ==='') continue;
 				params[paramName] = this.ovrFormControls[i].value.value;
 			}
 			const path = this.pathFormControl.value;
 
 			this.client.defaultParams = params;
 			const isOvrNotChanged = this.currOverrides.compareAndUpdate(this.ovrFormControls)
-	
+
 			if (this.currAppId === appId)
 			{
 				if (!isOvrNotChanged)
 				{
-					const subscrKeyList = this.subscribedKeys.data;		
-					if (subscrKeyList.length > 0) 
+					const subscrKeyList = this.subscribedKeys.data;
+					if (subscrKeyList.length > 0)
 					{
 						for (let i = 0; i < subscrKeyList.length; i++)
-						{							
+						{
 							const subscrKey = subscrKeyList[i];
-							this.client.removeConfigKeyListener(subscrKey.path);	
-						}						
+							this.client.removeConfigKeyListener(subscrKey.path);
+						}
 						await this.unsubscrCompleted();
 						this.subscribedKeys.data = [];
 					}
@@ -246,7 +245,7 @@ export class AppComponent implements OnInit
 					this.ccKeyLogEvents.data = [];
 				}
 			}
-			else 
+			else
 			{
 				this.client.appId = appId;
 				this.changedKeysCount = 0;
@@ -263,8 +262,8 @@ export class AppComponent implements OnInit
 				key.isSubscribed = false;
 				key.isToggleDisabled = false;
 				if (this.subscribedKeysMap.has(key.path)) key.isSubscribed = true;
-			}	
-			
+			}
+
 			this.currAppId = appId;
 			this.curPath = path;
 			this.configKeys.data = keys as ConfigurationKeyVm[];
@@ -295,9 +294,9 @@ export class AppComponent implements OnInit
 		keyVm.isSubscribed = true;
 		if(toggle.checked)
 		{
-			const keyInfo: SubscrConfigurationKey = 
+			const keyInfo: SubscrConfigurationKey =
 			{
-				path: keyVm.path, 
+				path: keyVm.path,
 				dataType: keyVm.dataType,
 				value: keyVm.value
 			}
@@ -338,7 +337,7 @@ export class AppComponent implements OnInit
 			}
 		}
 		else
-		{	
+		{
 			this.subscribedKeysMap.delete(keyInfo.path);
 			if (!this.unsubscrCompletedResolve)
 			{
@@ -353,7 +352,7 @@ export class AppComponent implements OnInit
 					}
 				}
 			}
-			if (this.subscribedKeysMap.size === 0 && this.unsubscrCompletedResolve) 
+			if (this.subscribedKeysMap.size === 0 && this.unsubscrCompletedResolve)
 			{
 				this.unsubscrCompletedResolve();
 				this.unsubscrCompletedPromise = undefined;
@@ -368,23 +367,23 @@ export class AppComponent implements OnInit
 
 
 	handleKeyChange(keyInfo: SubscrConfigurationKey)
-	{	
+	{
 		let keyList = this.configKeys.data;
 		for (let key of keyList)
 		{
 			if (key.path === keyInfo.path)
 			{
 				const keyLogList = this.ccKeyLogEvents.data;
-				const keyLog: CcKeyLog = 
+				const keyLog: CcKeyLog =
 				{
 					path: keyInfo.path,
 					dataType: keyInfo.dataType,
 					oldValue: valueToEnDateTime(key),
 					newValue: valueToEnDateTime(keyInfo),
-					eventTime: getEnDateTime()
+					eventTime: new Date().toLocaleString(uiLocale, uiDateTimeFormat)
 				}
 				keyLogList.push(keyLog);
-				if (!this.isCcKeyLogOpened) this.changedKeysCount += 1;	
+				if (!this.isCcKeyLogOpened) this.changedKeysCount += 1;
 				this.ccKeyLogEvents.data = keyLogList;
 
 				key.value = keyInfo.value;
@@ -406,7 +405,7 @@ export class AppComponent implements OnInit
 		}
 
 		keyInfo.viewValue = valueToEnDateTime(keyInfo);
-		
+
 		this.changeDetector.detectChanges();
 	}
 
@@ -450,16 +449,16 @@ export class AppComponent implements OnInit
 				this.subscribedKeysMap.delete(keyInfo.path);
 
 				const keyLogList = this.ccKeyLogEvents.data;
-				const keyLog: CcKeyLog = 
+				const keyLog: CcKeyLog =
 				{
 					path: keyInfo.path,
 					dataType: keyInfo.dataType,
 					oldValue: valueToEnDateTime(keyInfo),
 					newValue: 'null',
-					eventTime: getEnDateTime()
+					eventTime: new Date().toLocaleString(uiLocale, uiDateTimeFormat)
 				}
 				keyLogList.push(keyLog);
-				if (!this.isCcKeyLogOpened) this.changedKeysCount += 1;	
+				if (!this.isCcKeyLogOpened) this.changedKeysCount += 1;
 				this.ccKeyLogEvents.data = keyLogList;
 			break;
 			case AjusteeKeyListenerCode.TypeChanged:
@@ -492,14 +491,14 @@ export class AppComponent implements OnInit
 		this.changeDetector.detectChanges();
 	}
 
-	// dialogs 
+	// dialogs
 
 	async showKeyLog()
 	{
 		this.changedKeysCount = 0;
 		this.isCcKeyLogOpened = true;
 		const dialogRef = this.dialog.open<KeyChangesComponent, MatTableDataSource<CcKeyLog>>(KeyChangesComponent, {minWidth: '50rem', height: '40rem', disableClose: false, data: this.ccKeyLogEvents});
-		await observableToPromise(dialogRef.afterClosed());
+		await dialogRef.afterClosed().toPromise();
 		this.isCcKeyLogOpened = false;
 		this.ccKeyLogEvents.data = [];
 	}
@@ -507,13 +506,13 @@ export class AppComponent implements OnInit
 	async showSubscriptions()
 	{
 		const dialogRef = this.dialog.open<KeySubscriptionsComponent, MatTableDataSource<SubscrConfigurationKey>>(KeySubscriptionsComponent, {minWidth: '45rem', height: '45rem', disableClose: false, data: this.subscribedKeys});
-		await observableToPromise(dialogRef.afterClosed());
+		await dialogRef.afterClosed().toPromise();
 	}
 
 	async updateConfigKey(key: ConfigurationKeyVm)
 	{
 		const dialogRef = this.dialog.open<KeyUpdateComponent, ConfigurationKeyVm, ConfigurationKeyVm|undefined>(KeyUpdateComponent, {minWidth: '40rem', disableClose: false, data: key});
-		const updatedKey = await observableToPromise(dialogRef.afterClosed());
+		const updatedKey = await dialogRef.afterClosed().toPromise();
 		if (!updatedKey) return;
 		this.toastr.success(`The config key ${updatedKey.path} has been successfully updated.`);
 	}

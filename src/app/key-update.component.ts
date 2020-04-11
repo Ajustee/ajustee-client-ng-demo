@@ -2,7 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormControl } from '@angular/forms';
 import { ConfigurationKey, AjusteeClient, DataType } from './AjusteeClient';
-import { esm, toEnDate, toEnDateTime } from './utils';
+import { esm, dateTimeIso8601ToUi, dateIso8601ToUi } from './utils';
 import { AjusteeClientSvc } from './AjusteeClientSvc';
 import { ConfigurationKeyVm } from './models';
 
@@ -10,14 +10,13 @@ import { ConfigurationKeyVm } from './models';
 	templateUrl: './key-update.component.html',
 	styleUrls: ['./key-update.component.scss'],
 })
-
 export class KeyUpdateComponent
 {
 	isProcessing = false;
 	valueFormControl = new FormControl();
 	client: AjusteeClient;
 	readonly esm = esm;
-	
+
 	constructor(
 		public readonly dialogRef: MatDialogRef<KeyUpdateComponent, ConfigurationKey>,
 		@Inject(MAT_DIALOG_DATA) public readonly key: ConfigurationKeyVm,
@@ -25,22 +24,18 @@ export class KeyUpdateComponent
 	)
 	{
 		this.client = ajusteeClient.client;
-		if (!key.changedValue) this.valueFormControl = new FormControl(key.value);
-		else 
+		const value = key.changedValue == undefined ? key.value : key.changedValue;
+		switch (this.key.dataType)
 		{
-			let value: any;
-			switch (this.key.dataType)
-			{
-				case DataType.Date:
-				case DataType.DateTime:
-					value = new Date(key.changedValue);
-				break;
-				default:
-					value = key.changedValue
-			}
-			this.valueFormControl = new FormControl(value);
+			case DataType.Date:
+			case DataType.DateTime:
+				let strValue = value as string;
+				if (strValue.endsWith('Z')) strValue = strValue.substr(0, strValue.length-1);
+				this.valueFormControl = new FormControl(new Date(strValue));
+			break;
+			default:
+				this.valueFormControl = new FormControl(value);
 		}
-		
 	}
 
 	validate ()
@@ -77,38 +72,43 @@ export class KeyUpdateComponent
 		this.isProcessing = true;
 		try
 		{
-			const formCtValue = this.valueFormControl.value;
 			let newValue: any;
 			let changedValue: any;
 			switch(this.key.dataType)
 			{
 				case DataType.Integer:
-					newValue = formCtValue.toString();
+					newValue = this.valueFormControl.value.toString();
 					changedValue = newValue;
 				break;
 
 				case DataType.Date:
-					newValue = new Date(formCtValue.getTime() - formCtValue.getTimezoneOffset()*60*1000);
+				{
+					const date = this.valueFormControl.value as Date;
+					newValue = new Date(date.getTime() - date.getTimezoneOffset()*60*1000);
 					newValue = newValue.toJSON();
 					const i = newValue.indexOf('T');
 					newValue = newValue.substring(0, i);
-					changedValue = toEnDate(newValue);
-				break;
-
+					changedValue = dateIso8601ToUi(newValue);
+					break;
+				}
 				case DataType.DateTime:
-					newValue = formCtValue.toJSON();
-					changedValue = toEnDateTime(newValue);
+				{
+					const date = this.valueFormControl.value as Date;
+					newValue = new Date(date.getTime() - date.getTimezoneOffset()*60*1000);
+					newValue = newValue.toJSON();
+					changedValue = dateTimeIso8601ToUi(newValue);
+				}
 				break;
 
 				default:
-					newValue = formCtValue;
-					changedValue = formCtValue;
+					newValue = this.valueFormControl.value;
+					changedValue = newValue;
 			}
 			await this.client.updateConfigKey(this.key.path, newValue);
 
 			if(changedValue === this.key.viewValue) this.key.changedValue = undefined;
 			else this.key.changedValue = changedValue;
-				
+
 			this.dialogRef.close(this.key);
 		}
 		catch(e)

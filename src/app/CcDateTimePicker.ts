@@ -4,7 +4,7 @@ import { Platform } from '@angular/cdk/platform';
 import { MatCheckbox, MatCheckboxChange } from '@angular/material/checkbox';
 import { MAT_DATE_FORMATS, NativeDateAdapter, DateAdapter } from '@angular/material/core';
 import { MatDatepicker } from '@angular/material/datepicker';
-import { esm, uiLocale, uiDateFormatter, DateTimeFormatter, uiDateFormat } from './utils';
+import { esm, uiLocale, uiDateTimeFormatter, uiDateTimeFormat, DateTimeFormatter } from './utils';
 
 const monthYearLabel: Intl.DateTimeFormatOptions = {year: 'numeric', month: 'short'};
 const dateA11yLabel: Intl.DateTimeFormatOptions = {year: 'numeric', month: 'long', day: 'numeric'};
@@ -42,7 +42,7 @@ export class CcDateTimeAdapter extends NativeDateAdapter
 	{
 		switch(displayFormat)
 		{
-			case uiDateFormat: return uiDateFormatter;
+			case uiDateTimeFormat: return uiDateTimeFormatter;
 			case monthYearLabel: return monthYearLabelFormatter;
 			case dateA11yLabel: return dateA11yLabelFormatter;
 			case monthYearA11yLabel: return monthYearA11yLabelFormatter;
@@ -85,7 +85,7 @@ export class CcDateTimeAdapter extends NativeDateAdapter
 				},
 				display:
 				{
-					dateInput: uiDateFormatter,
+					dateInput: uiDateTimeFormatter,
 					monthYearLabel: monthYearLabelFormatter,
 					dateA11yLabel: dateA11yLabelFormatter,
 					monthYearA11yLabel: monthYearA11yLabelFormatter,

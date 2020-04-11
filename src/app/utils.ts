@@ -16,6 +16,12 @@ export class ESM implements ErrorStateMatcher
 }
 export const esm = new ESM();
 
+
+
+export const uiLocale = 'en-us';
+const uiDateFormatter = new Intl.DateTimeFormat(uiLocale, {year: 'numeric', month: 'numeric', day: 'numeric'})
+export const dateIso8601ToUi = (en: string) => uiDateFormatter.format(new Date(en));
+
 export class DateTimeFormatter
 {
 	constructor(private readonly formatter: Intl.DateTimeFormat)
@@ -36,48 +42,11 @@ export class DateTimeFormatter
 	}
 }
 
-export const uiLocale = 'en-us';
-export const uiDateFormat: Intl.DateTimeFormatOptions = {year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: '2-digit' };
-export const uiDateFormatter = new DateTimeFormatter(new Intl.DateTimeFormat(uiLocale, uiDateFormat));
-export const dateIso8601ToUi = (dateTime: string) => uiDateFormatter.format(new Date(dateTime.substr(0, 23)));
-
-export const uiDateTimeMinutesFormat: Intl.DateTimeFormatOptions = {year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit' };
-export const uiDateTimeMinutesFormatter = new Intl.DateTimeFormat(uiLocale, uiDateTimeMinutesFormat);
-export const dateIso8601ToUiMinutes = (dateTime: string) => uiDateTimeMinutesFormatter.format(new Date(dateTime.substr(0, 16)));
-
-const enUsDayDateFormatter = new Intl.DateTimeFormat("en-us", {year: 'numeric', month: 'numeric', day: 'numeric'})
-
-export const dayDateIso8601ToUi = (en: string) =>
-{
-	// const year = en.substr(0, 4);
-	// const month = en.charCodeAt(5) === 48 ? en.substr(6, 1) : en.substr(5, 2);
-	// const day = en.charCodeAt(8) === 48 ? en.substr(9, 1) : en.substr(8, 2);
-	// return month + '/' + day + '/' + year;
-	return enUsDayDateFormatter.format(new Date(en));
-}
+export const uiDateTimeFormat: Intl.DateTimeFormatOptions = {year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: '2-digit' };
+export const uiDateTimeFormatter = new DateTimeFormatter(new Intl.DateTimeFormat(uiLocale, uiDateTimeFormat));
+export const dateTimeIso8601ToUi = (dateTime: string) => uiDateTimeFormatter.format(new Date(dateTime.substr(0, 23)));
 
 
-export const getEnDateTime= () => 
-{
-	const today = new Date();
-	const date = today.toLocaleDateString('en-US');
-	const time = today.toLocaleTimeString('en-US');
-	return date + ' ' + time;
-}
-
-export const toEnDate = (date: string) => 
-{
-	const enDate = new Date(date);
-	return enDate.toLocaleDateString('en-US');
-}
-
-export const toEnDateTime = (dateTime: string) => 
-{
-	const enDateTime = new Date(dateTime);
-	const date = enDateTime.toLocaleDateString('en-US');
-	const time = enDateTime.toLocaleTimeString('en-US');
-	return date + ' ' + time;
-}
 
 export class OvrComparer extends Map<string, { flag: boolean, value: string}>
 {
@@ -95,15 +64,15 @@ export class OvrComparer extends Map<string, { flag: boolean, value: string}>
 				const currValue = this.get(paramName);
 				const value = control.value.value;
 
-				if (!currValue) 
+				if (!currValue)
 				{
 					isEqual = false;
 					this.set(paramName, {flag: this._flag, value: value});
-				}			
-				else 
+				}
+				else
 				{
 					currValue.flag = this._flag;
-					if (value !== currValue.value) 
+					if (value !== currValue.value)
 					{
 						isEqual = false;
 						currValue.value = value;
@@ -114,7 +83,7 @@ export class OvrComparer extends Map<string, { flag: boolean, value: string}>
 
 		for(const [key, mapValue] of this)
 		{
-			if (mapValue.flag !== this._flag) 
+			if (mapValue.flag !== this._flag)
 			{
 				this.delete(key);
 				isEqual = false;
@@ -133,12 +102,12 @@ export const valueToEnDateTime = (key: ConfigurationKey|AjusteeKeyListenerBase) 
 	{
 		case DataType.Date:
 		{
-			value = toEnDate(key.value.toString());
+			value = dateIso8601ToUi(key.value.toString());
 			break;
 		}
 		case DataType.DateTime:
 		{
-			value = toEnDateTime(key.value.toString());
+			value = dateTimeIso8601ToUi(key.value.toString());
 			break;
 		}
 		default:
