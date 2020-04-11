@@ -37,24 +37,29 @@ export function getInputPositiveNumber<T>(v: any, defaultValue: T): number | T {
     return !isNaN(v) && v >= 0 ? v : defaultValue;
 }
 
-export function isUserSizesValid(unit: 'percent' | 'pixel', sizes: Array<number | null>): boolean {
-    // All sizes have to be not null and total should be 100
-    if(unit === 'percent') {
-        const total = sizes.reduce((total, s) => s !== null ? total + s : total, 0);
-        return sizes.every(s => s !== null) && total > 99.9 && total < 100.1;
-    }
-    
-    // A size at null is mandatory but only one.
-    if(unit === 'pixel') {
-        return sizes.filter(s => s === null).length === 1;
-    }
+export function isUserSizesValid(unit: 'percent' | 'pixel', sizes: Array<number | null>): boolean
+{
+	switch(unit)
+	{
+		case 'percent':
+		{
+			const total = sizes.reduce((total, s) => s !== null ? total + s : total, 0);
+			return sizes.every(s => s !== null) && total > 99.9 && total < 100.1;
+		}
+		case 'pixel':
+		{
+			return sizes.filter(s => s === null).length === 1;
+		}
+		default:
+			return false;
+	}
 }
 
 export function getAreaMinSize(a: IArea): null | number {
     if(a.size === null) {
         return null;
     }
-    
+
     if(a.component.lockSize === true) {
         return a.size;
     }
@@ -74,7 +79,7 @@ export function getAreaMaxSize(a: IArea): null | number {
     if(a.size === null) {
         return null;
     }
-    
+
     if(a.component.lockSize === true) {
         return a.size;
     }
@@ -99,9 +104,11 @@ export function getGutterSideAbsorptionCapacity(unit: 'percent' | 'pixel', sideA
     }, {remain: pixels, list: []});
 }
 
-function getAreaAbsorptionCapacity(unit: 'percent' | 'pixel', areaSnapshot: IAreaSnapshot, pixels: number, allAreasSizePixel: number): IAreaAbsorptionCapacity {
+function getAreaAbsorptionCapacity(unit: 'percent' | 'pixel', areaSnapshot: IAreaSnapshot, pixels: number, allAreasSizePixel: number): IAreaAbsorptionCapacity
+{
     // No pain no gain
-    if(pixels === 0) {
+	if(pixels === 0)
+	{
         return {
             areaSnapshot,
             pixelAbsorb: 0,
@@ -109,9 +116,10 @@ function getAreaAbsorptionCapacity(unit: 'percent' | 'pixel', areaSnapshot: IAre
             pixelRemain: 0,
         };
     }
-    
+
     // Area start at zero and need to be reduced, not possible
-    if(areaSnapshot.sizePixelAtStart === 0 && pixels < 0) {
+	if(areaSnapshot.sizePixelAtStart === 0 && pixels < 0)
+	{
         return {
             areaSnapshot,
             pixelAbsorb: 0,
@@ -119,24 +127,24 @@ function getAreaAbsorptionCapacity(unit: 'percent' | 'pixel', areaSnapshot: IAre
             pixelRemain: pixels,
         };
     }
-    
-    if(unit === 'percent') {
-        return getAreaAbsorptionCapacityPercent(areaSnapshot, pixels, allAreasSizePixel);
-    }
-    
-	if(unit === 'pixel') {
-        return getAreaAbsorptionCapacityPixel(areaSnapshot, pixels, allAreasSizePixel);
-    }
+
+	switch(unit)
+	{
+		case 'percent': return getAreaAbsorptionCapacityPercent(areaSnapshot, pixels, allAreasSizePixel);
+		case 'pixel': return getAreaAbsorptionCapacityPixel(areaSnapshot, pixels, allAreasSizePixel);
+		default: throw new Error(`Invalid unit '${unit}'`);
+	}
 }
 
-function getAreaAbsorptionCapacityPercent(areaSnapshot: IAreaSnapshot, pixels: number, allAreasSizePixel: number): IAreaAbsorptionCapacity {
+function getAreaAbsorptionCapacityPercent(areaSnapshot: IAreaSnapshot, pixels: number, allAreasSizePixel: number): IAreaAbsorptionCapacity
+{
     const tempPixelSize = areaSnapshot.sizePixelAtStart + pixels;
     const tempPercentSize = tempPixelSize / allAreasSizePixel * 100;
-    
+
     // ENLARGE AREA
-    
+
     if(pixels > 0) {
-        // If maxSize & newSize bigger than it > absorb to max and return remaining pixels 
+        // If maxSize & newSize bigger than it > absorb to max and return remaining pixels
         if(areaSnapshot.area.maxSize !== null && tempPercentSize > areaSnapshot.area.maxSize) {
             // Use area.area.maxSize as newPercentSize and return calculate pixels remaining
             const maxSizePixel = areaSnapshot.area.maxSize / 100 * allAreasSizePixel;
@@ -156,9 +164,9 @@ function getAreaAbsorptionCapacityPercent(areaSnapshot: IAreaSnapshot, pixels: n
     }
 
     // REDUCE AREA
-    
+
     else if(pixels < 0) {
-        // If minSize & newSize smaller than it > absorb to min and return remaining pixels 
+        // If minSize & newSize smaller than it > absorb to min and return remaining pixels
         if(areaSnapshot.area.minSize !== null && tempPercentSize < areaSnapshot.area.minSize) {
             // Use area.area.minSize as newPercentSize and return calculate pixels remaining
             const minSizePixel = areaSnapshot.area.minSize / 100 * allAreasSizePixel;
@@ -185,16 +193,24 @@ function getAreaAbsorptionCapacityPercent(areaSnapshot: IAreaSnapshot, pixels: n
             percentAfterAbsorption: tempPercentSize,
             pixelRemain: 0
         };
-    }
+	}
+	return {
+		areaSnapshot,
+		pixelAbsorb: 0,
+		percentAfterAbsorption: areaSnapshot.sizePercentAtStart,
+		pixelRemain: 0,
+	};
 }
 
-function getAreaAbsorptionCapacityPixel(areaSnapshot: IAreaSnapshot, pixels: number, containerSizePixel: number): IAreaAbsorptionCapacity {
+function getAreaAbsorptionCapacityPixel(areaSnapshot: IAreaSnapshot, pixels: number, containerSizePixel: number): IAreaAbsorptionCapacity
+{
     const tempPixelSize = areaSnapshot.sizePixelAtStart + pixels;
-            
+
     // ENLARGE AREA
 
-    if(pixels > 0) {
-        // If maxSize & newSize bigger than it > absorb to max and return remaining pixels 
+	if(pixels > 0)
+	{
+        // If maxSize & newSize bigger than it > absorb to max and return remaining pixels
         if(areaSnapshot.area.maxSize !== null && tempPixelSize > areaSnapshot.area.maxSize) {
             return {
                 areaSnapshot,
@@ -212,9 +228,10 @@ function getAreaAbsorptionCapacityPixel(areaSnapshot: IAreaSnapshot, pixels: num
     }
 
     // REDUCE AREA
-    
-    else if(pixels < 0) {
-        // If minSize & newSize smaller than it > absorb to min and return remaining pixels 
+
+	else if(pixels < 0)
+	{
+        // If minSize & newSize smaller than it > absorb to min and return remaining pixels
         if(areaSnapshot.area.minSize !== null && tempPixelSize < areaSnapshot.area.minSize) {
             return {
                 areaSnapshot,
@@ -238,18 +255,25 @@ function getAreaAbsorptionCapacityPixel(areaSnapshot: IAreaSnapshot, pixels: num
             percentAfterAbsorption: -1,
             pixelRemain: 0
         };
-    }
+	}
+	return {
+		areaSnapshot,
+		pixelAbsorb: 0,
+		percentAfterAbsorption: areaSnapshot.sizePercentAtStart,
+		pixelRemain: 0,
+	};
 }
 
-export function updateAreaSize(unit: 'percent' | 'pixel', item: IAreaAbsorptionCapacity) {
-    
-    if(unit === 'percent') {
-        item.areaSnapshot.area.size = item.percentAfterAbsorption;
-    }
-    else if(unit === 'pixel') {
-        // Update size except for the wildcard size area
-        if(item.areaSnapshot.area.size !== null) {
-            item.areaSnapshot.area.size = item.areaSnapshot.sizePixelAtStart + item.pixelAbsorb;
-        }
-    }
+export function updateAreaSize(unit: 'percent' | 'pixel', item: IAreaAbsorptionCapacity)
+{
+	switch(unit)
+	{
+		case 'percent':
+			item.areaSnapshot.area.size = item.percentAfterAbsorption;
+			return;
+		case 'pixel':
+			if(item.areaSnapshot.area.size !== null) item.areaSnapshot.area.size = item.areaSnapshot.sizePixelAtStart + item.pixelAbsorb;
+			return;
+		default: throw new Error(`Invalid unit '${unit}'`);
+	}
 }

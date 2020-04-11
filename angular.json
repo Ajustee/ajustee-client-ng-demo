@@ -22,16 +22,17 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/demo-app",
+            "aot": true,
+			"es5BrowserSupport": false,
+            "outputPath": "dist/debug",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
-            "aot": true,
             "assets": [
               "src/favicon.ico",
 			  "src/assets",
-			  "src/config-private.json",
+			  "src/config.json",
 			  "src/config.js"
             ],
             "styles": [
@@ -56,7 +57,7 @@
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
-              "outputPath": "dist/demo-app",
+              "outputPath": "dist/release",
               "budgets": [
                 {
                   "type": "initial",
@@ -91,7 +92,7 @@
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
-              "outputPath": "dist/demo-app-ru/",
+              "outputPath": "dist/release-ru/",
               "i18nFile": "src/locale/messages.ru.xlf",
               "i18nLocale": "ru",
               "i18nMissingTranslation": "error"
@@ -103,7 +104,7 @@
                   "maximumWarning": "6kb"
                 }
               ],
-              "outputPath": "dist/demo-app-ru/",
+              "outputPath": "dist/debug-ru/",
               "i18nFile": "src/locale/messages.ru.xlf",
               "i18nLocale": "ru",
               "i18nMissingTranslation": "error"

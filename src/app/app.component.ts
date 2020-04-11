@@ -99,15 +99,15 @@ export class AppComponent implements OnInit
 		this.subscribedKeys = new MatTableDataSource<SubscrConfigurationKey>();
 	}
 
-	async ngOnInit(): Promise<void> {
+	async ngOnInit(): Promise<void>
+	{
 		try
 		{
-			const res = await fetch('config-private.json');
+			const res = await fetch('config.json');
 			const config = await res.json();
 			this.appIdFormControl.setValue(config.appId);
 		}
 		catch(e){}
-
 	}
 	// app.component.html
 
