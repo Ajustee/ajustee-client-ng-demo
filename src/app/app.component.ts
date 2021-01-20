@@ -10,6 +10,8 @@ import { AjusteeClient, AjusteeAllKeysListener, AjusteeKeyListenerCode, AjusteeK
 import { esm, valueToEnDateTime, OvrComparer, uiLocale, uiDateTimeFormat } from './utils';
 import { KeyUpdateComponent } from './key-update.component';
 import { AjusteeClientSvc } from './AjusteeClientSvc';
+import envConfig from '../env/config';
+import { EnvInfoComponent } from './EnvInfoComponent';
 
 export interface CurrOverride
 {
@@ -40,6 +42,7 @@ export class TrackKeyChangeDirective
 
 export class AppComponent implements OnInit
 {
+	envConfig = envConfig;
 	isProcessing = false;
 	errDurationSeconds = 3;
 
@@ -517,4 +520,8 @@ export class AppComponent implements OnInit
 		this.toastr.success(`The config key ${updatedKey.path} has been successfully updated.`);
 	}
 
+	showInfo()
+	{
+		this.dialog.open<EnvInfoComponent, undefined, void>(EnvInfoComponent, {minWidth: '40rem', disableClose: false});
+	}
 }

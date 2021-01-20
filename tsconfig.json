@@ -6,9 +6,7 @@
     "lib": [ "es2018", "dom" ],
     "module": "esnext",
     "moduleResolution": "node",
-    "typeRoots": [
-      "node_modules/@types"
-	],
+    "typeRoots": [],
 
     "baseUrl": ".",
     "sourceMap": true,

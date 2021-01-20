@@ -1,3 +1,9 @@
+<mat-toolbar color="primary">
+	<button mat-icon-button (click)="showInfo()">
+		<mat-icon [svgIcon]="'info'"></mat-icon>
+	</button>
+	<span>Ajustee FrontOffice API Demo ({{envConfig.name}})</span>
+</mat-toolbar>
 <div style="display: flex; height: 100vh">
 	<ngx-loading [show]="isProcessing" [config]="{ backdropBorderRadius: '3px' }"></ngx-loading>
 
@@ -89,7 +95,7 @@
 						<div *ngSwitchCase="'Connected'" style="color: green; display: flex; align-items: center; font-size: 17px;">
 							<div>ONLINE</div>
 							<div class="dot" style="margin-left: 2ch; background-color: green;"></div>
-						</div>						
+						</div>
 					</ng-container>
 					<div style="display: flex; justify-content: space-around;">
 						<button mat-raised-button color="primary" (click)="showSubscriptions();">
@@ -116,8 +122,8 @@
 
 					<ng-container matColumnDef="Value">
 						<mat-header-cell i18n="@@valueHeader" *matHeaderCellDef style="color: #673ab7; font-size: 14px;" > Value </mat-header-cell>
-						<mat-cell *matCellDef="let element;" style="word-break: break-all;"> 
-							<span [style.text-decoration]="element.changedValue != undefined ? 'line-through': 'unset'">{{element.viewValue ? element.viewValue : element.value}}</span> 
+						<mat-cell *matCellDef="let element;" style="word-break: break-all;">
+							<span [style.text-decoration]="element.changedValue != undefined ? 'line-through': 'unset'">{{element.viewValue ? element.viewValue : element.value}}</span>
 							<mat-icon [svgIcon]="'arrow'" *ngIf="element.changedValue != undefined" style="min-width: 24px;"></mat-icon>
 							<span>{{element.changedValue != undefined ? element.changedValue : ''}}</span>
 						</mat-cell>

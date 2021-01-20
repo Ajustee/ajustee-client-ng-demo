@@ -5,12 +5,17 @@
   "browserslist": [
     "Chrome >= 61"
   ],
-  "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "build-release": "ng build --prod --output-path dist/release --base-href /",
-    "build-debug": "ng build --aot --output-path dist/debug --base-href /",
+  "scripts":
+  {
+	"ng": "ng",
+
+	"start-dev": "ng serve --configuration=dev",
+	"start-dev-ru": "ng serve --configuration=dev-ru",
+	"start-prod": "ng serve --configuration=prod",
+
+    "build-prod": "ng build --configuration=ajustee-prod,production",
+	"build-dev": "ng build --configuration=cc-dev",
+
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"

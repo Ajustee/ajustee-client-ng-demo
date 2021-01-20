@@ -16,6 +16,7 @@ import {MatGridListModule} from '@angular/material/grid-list';
 import {MatCardModule} from '@angular/material/card';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatIconModule} from '@angular/material/icon';
+import {MatToolbarModule} from '@angular/material/toolbar';
 
 import { AngularSplitModule } from 'angular-split';
 
@@ -40,13 +41,13 @@ import { CcDatePicker, CcDateTimePicker } from './CcDateTimePicker';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { AjusteeClientSvc } from './AjusteeClientSvc';
-
-// the second parameter 'fr' is optional
+import { EnvInfoComponent } from './EnvInfoComponent';
 
 
 @NgModule({
 	declarations: [
 		AppComponent,
+		EnvInfoComponent,
 		KeyUpdateComponent,
 		KeyChangesComponent,
 		KeySubscriptionsComponent,
@@ -87,6 +88,7 @@ import { AjusteeClientSvc } from './AjusteeClientSvc';
 		NgxLoadingModule,
 		MatDatepickerModule,
 		MatCheckboxModule,
+		MatToolbarModule,
 		NgxLoadingModule.forRoot(
 		{
 			animationType: ngxLoadingAnimationTypes.doubleBounce,
@@ -110,6 +112,7 @@ export class AppModule {
 		iconRegistry.addSvgIcon('cancel', domSanitizer.bypassSecurityTrustResourceUrl('assets/cancel.svg'));
 		iconRegistry.addSvgIcon('add', domSanitizer.bypassSecurityTrustResourceUrl('assets/add.svg'));
 		iconRegistry.addSvgIcon('arrow', domSanitizer.bypassSecurityTrustResourceUrl('assets/arrow.svg'));
+		iconRegistry.addSvgIcon('info', domSanitizer.bypassSecurityTrustResourceUrl('assets/info.svg'));
 		registerLocaleData(localeRu, 'ru');
 	}
 }

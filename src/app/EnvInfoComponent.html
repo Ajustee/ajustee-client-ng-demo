@@ -1,0 +1,16 @@
+<h2 mat-dialog-title>
+	Environment info
+</h2>
+
+<mat-dialog-content style="display: grid; grid-template-columns: auto auto; column-gap: 1rem; row-gap: 15px;">
+	<div>Name:</div>
+	<div>{{envConfig.name}}</div>
+	<div>FrontOffice REST API URL:</div>
+	<div>{{envConfig.apiUrlFo}}</div>
+	<div>FrontOffice WebSocket API URL:</div>
+	<div>{{envConfig.apiWsUrlFo}}</div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="center">
+	<button mat-button mat-dialog-close cdkFocusInitial>OK</button>
+</mat-dialog-actions>
