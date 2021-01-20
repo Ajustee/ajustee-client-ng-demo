@@ -6,7 +6,6 @@ enableProdMode();
 export default <EnvConfig>
 {
 	name: 'prod',
-	isProd: true,
-	apiUrlFo: 'https://va12w5ncz8.execute-api.us-west-2.amazonaws.com/fo',
-	apiWsUrlFo: 'wss://imn16ypehe.execute-api.us-west-2.amazonaws.com/ws',
+	apiUrlFo: 'https://api.ajustee.com',
+	apiWsUrlFo: 'wss://ws.ajustee.com',
 }
