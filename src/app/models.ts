@@ -1,4 +1,4 @@
-import { DataType, ConfigurationKey, AjusteeKeyListener } from './AjusteeClient';
+import { DataType, ConfigurationKey, AjusteeKeyListener } from '@ajustee/ajustee-client-web';
 import { FormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
 

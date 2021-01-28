@@ -1,7 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormControl } from '@angular/forms';
-import { ConfigurationKey, AjusteeClient, DataType } from './AjusteeClient';
+import { ConfigurationKey, AjusteeClient, DataType } from '@ajustee/ajustee-client-web';
 import { esm, dateTimeIso8601ToUi, dateIso8601ToUi } from './utils';
 import { AjusteeClientSvc } from './AjusteeClientSvc';
 import { ConfigurationKeyVm } from './models';

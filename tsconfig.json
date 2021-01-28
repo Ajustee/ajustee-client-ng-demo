@@ -8,6 +8,10 @@
     "moduleResolution": "node",
     "typeRoots": [],
 
+    "paths": {
+        "@ajustee/ajustee-client-web": ["client-lib/src/index"]
+    },
+
     "baseUrl": ".",
     "sourceMap": true,
 	"declaration": false,

@@ -6,7 +6,7 @@ import { KeyChangesComponent } from './key-changes.component';
 import { ToastrService } from 'ngx-toastr';
 import { KeySubscriptionsComponent } from './key-subscriptions.component';
 import { ConfigurationKeyVm, CcKeyLog, OverrideFormControls, SubscrConfigurationKey } from './models';
-import { AjusteeClient, AjusteeAllKeysListener, AjusteeKeyListenerCode, AjusteeKeyListenerBase, AjusteeClientStatus, AjusteeKeyStatus } from './AjusteeClient';
+import { AjusteeClient, AjusteeAllKeysListener, AjusteeKeyListenerCode, AjusteeKeyListenerBase, AjusteeClientStatus, AjusteeKeyStatus } from '@ajustee/ajustee-client-web';
 import { esm, valueToEnDateTime, OvrComparer, uiLocale, uiDateTimeFormat } from './utils';
 import { KeyUpdateComponent } from './key-update.component';
 import { AjusteeClientSvc } from './AjusteeClientSvc';

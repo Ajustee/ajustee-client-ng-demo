@@ -1,4 +1,4 @@
-import { AjusteeClient } from "./AjusteeClient";
+import { AjusteeClient } from "@ajustee/ajustee-client-web";
 import { Injectable } from '@angular/core';
 import { SubscrConfigurationKey } from './models';
 import envConfig from '../env/config';

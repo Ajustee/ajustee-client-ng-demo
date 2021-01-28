@@ -1,7 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
-import { AjusteeClient, ConfigurationKey } from './AjusteeClient';
+import { AjusteeClient, ConfigurationKey } from '@ajustee/ajustee-client-web';
 import { KeyUpdateComponent } from './key-update.component';
 import { ToastrService } from 'ngx-toastr';
 import { CcKeyLog, SubscrConfigurationKey } from './models';

@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { FormControl } from '@angular/forms';
-import { ConfigurationKey, DataType, AjusteeKeyListenerBase } from './AjusteeClient';
+import { ConfigurationKey, DataType, AjusteeKeyListenerBase } from '@ajustee/ajustee-client-web';
 import { OverrideFormControls } from './models';
 
 export const observableToPromise = <T> (observable: Observable<T>) => new Promise<T>(observable.subscribe.bind(observable));
